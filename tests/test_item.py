@@ -50,4 +50,12 @@ def test_string_to_number():
     assert Item.string_to_number('5.0') == 5
     assert Item.string_to_number('5.5') == 5
 
+
+def test_repr(test_item):
+    assert repr(test_item) == "Item('Ноутбук', 20000, 5)"
+
+
+def test_str(test_item):
+    assert str(test_item) == 'Ноутбук'
+
     """ pytest --cov=src --cov-report=html """
