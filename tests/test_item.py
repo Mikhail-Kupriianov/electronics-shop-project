@@ -1,5 +1,7 @@
 import pytest
+
 from src.item import Item
+from src.phone import Phone
 
 """Здесь надо написать тесты с использованием pytest для модуля item."""
 
@@ -57,5 +59,13 @@ def test_repr(test_item):
 
 def test_str(test_item):
     assert str(test_item) == 'Ноутбук'
+
+
+def test_add(test_item):
+    phone1 = Phone("iPhone 14", 120_000, 5, 2)
+    assert test_item + test_item == 10
+    assert phone1 + phone1 == 10
+    assert test_item + phone1 == 10
+    assert phone1 + test_item == 10
 
     """ pytest --cov=src --cov-report=html """
