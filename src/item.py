@@ -2,12 +2,18 @@ import csv
 import os
 
 
+class InstantiateCSVError(Exception):
+    def __init__(self):
+        self.message = "В файле csv повреждены данные"
+
+
 class Item:
     """
     Класс для представления товара в магазине.
     """
     OPERATION_DIR = os.path.abspath(os.path.dirname(__file__))
-    csv_file = os.path.join(OPERATION_DIR, 'items.csv')
+    csv_file_name = 'items.csv'
+
     pay_rate = 1.0
     all = []
 
@@ -28,11 +34,24 @@ class Item:
     @classmethod
     def instantiate_from_csv(cls) -> None:
         """ Класс-метод, инициализирующий экземпляры класса `Item` данными из файла src/items.csv"""
+        csv_file = os.path.join(cls.OPERATION_DIR, cls.csv_file_name)
         cls.all.clear()
-        with open(Item.csv_file, encoding='windows-1251') as csvfile:
-            load_data = csv.DictReader(csvfile)
-            for line in load_data:
-                cls(line["name"], line["price"], line["quantity"])
+        try:
+            with open(csv_file, encoding='windows-1251') as csvfile:
+                load_data = csv.DictReader(csvfile)
+                for line in load_data:
+                    if len(line) != 3 or None in line.values():
+                        raise InstantiateCSVError
+        except InstantiateCSVError:
+            print(f'InstantiateCSVError: Файл {cls.csv_file_name} поврежден')
+        except FileNotFoundError:
+            print(f'FileNotFoundError: Отсутствует файл {cls.csv_file_name}')
+
+        else:
+            with open(csv_file, encoding='windows-1251') as csvfile:
+                load_data = csv.DictReader(csvfile)
+                for line in load_data:
+                    cls(line["name"], line["price"], line["quantity"])
 
     @staticmethod
     def string_to_number(dig_str: str) -> int:
@@ -76,4 +95,3 @@ class Item:
         if not isinstance(other, Item):
             raise ValueError('Складывать можно только объекты Item и дочерние от них.')
         return self.quantity + other.quantity
-
