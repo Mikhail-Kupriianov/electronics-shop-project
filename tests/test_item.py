@@ -13,14 +13,14 @@ def test_item():
 
 @pytest.fixture
 def test_bad_filename():
-    Item.csv_file_name = 'items_b.csv'
-    Item.instantiate_from_csv()
+    # Item.csv_file_name = 'items_b.csv'
+    Item.instantiate_from_csv('items_b.csv')
 
 
 @pytest.fixture
 def test_bad_data():
-    Item.csv_file_name = 'items_bad.csv'
-    Item.instantiate_from_csv()
+    # Item.csv_file_name = 'items_bad.csv'
+    Item.instantiate_from_csv('items_bad.csv')
 
 
 def test_init(test_item):
@@ -59,16 +59,20 @@ def test_instantiate_from_csv():
     assert len(Item.all) == 5
 
 
-def test_exceptions_bad_data_csv(test_bad_data):
+def test_exceptions_bad_data_csv():
+
+    with pytest.raises(InstantiateCSVError):
+        Item.instantiate_from_csv('items_bad.csv')
+
     assert Item.all == []
-    # with pytest.raises(InstantiateCSVError):
-    #     Item.instantiate_from_csv()
 
 
-def test_exceptions_inst_from_csv(test_bad_filename):
+def test_exceptions_inst_from_csv():
+
+    with pytest.raises(FileNotFoundError):
+        Item.instantiate_from_csv('items_b.csv')
+
     assert Item.all == []
-    # with pytest.raises(FileNotFoundError):
-    #     Item.instantiate_from_csv()
 
 
 def test_string_to_number():
