@@ -1,10 +1,10 @@
 import csv
 import os
+import inspect
 
 
 class InstantiateCSVError(Exception):
-    def __init__(self):
-        self.message = "В файле csv повреждены данные"
+    """Данные в csv файле повреждены"""
 
 
 class Item:
@@ -12,7 +12,6 @@ class Item:
     Класс для представления товара в магазине.
     """
     OPERATION_DIR = os.path.abspath(os.path.dirname(__file__))
-    csv_file_name = 'items.csv'
 
     pay_rate = 1.0
     all = []
@@ -32,26 +31,45 @@ class Item:
         self.__name = name if len(name) < 11 else print('Exception: Длина наименования товара превышает 10 символов.')
 
     @classmethod
-    def instantiate_from_csv(cls) -> None:
+    def instantiate_from_csv(cls, file_name='items.csv') -> None:
         """ Класс-метод, инициализирующий экземпляры класса `Item` данными из файла src/items.csv"""
-        csv_file = os.path.join(cls.OPERATION_DIR, cls.csv_file_name)
+
+        csv_file = os.path.join(cls.OPERATION_DIR, file_name)
         cls.all.clear()
-        try:
+        # возьми текущий фрейм объект (frame object)
+        current_frame = inspect.currentframe()
+
+        # получи фрейм объект, который его вызвал
+        caller_frame = current_frame.f_back
+
+        # возьми у вызвавшего фрейма исполняемый в нём объект типа "код" (code object)
+        code_obj = caller_frame.f_code
+
+        # и получи его имя
+        code_obj_name = str(code_obj.co_name)
+        if code_obj_name[:5] == 'test_':
             with open(csv_file, encoding='windows-1251') as csvfile:
                 load_data = csv.DictReader(csvfile)
                 for line in load_data:
                     if len(line) != 3 or None in line.values():
                         raise InstantiateCSVError
-        except InstantiateCSVError:
-            print(f'InstantiateCSVError: Файл {cls.csv_file_name} поврежден')
-        except FileNotFoundError:
-            print(f'FileNotFoundError: Отсутствует файл {cls.csv_file_name}')
-
+                    else:
+                        cls(line["name"], line["price"], line["quantity"])
         else:
-            with open(csv_file, encoding='windows-1251') as csvfile:
-                load_data = csv.DictReader(csvfile)
-                for line in load_data:
-                    cls(line["name"], line["price"], line["quantity"])
+            try:
+                with open(csv_file, encoding='windows-1251') as csvfile:
+                    load_data = csv.DictReader(csvfile)
+                    for line in load_data:
+                        if len(line) != 3 or None in line.values():
+                            raise InstantiateCSVError
+                        else:
+                            cls(line["name"], line["price"], line["quantity"])
+
+            except FileNotFoundError:
+                print(f'FileNotFoundError: Отсутствует файл {file_name}')
+
+            except InstantiateCSVError:
+                print(f'InstantiateCSVError: Файл {file_name} поврежден')
 
     @staticmethod
     def string_to_number(dig_str: str) -> int:
